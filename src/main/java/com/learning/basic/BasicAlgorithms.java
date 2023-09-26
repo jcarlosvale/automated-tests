@@ -1,7 +1,5 @@
 package com.learning.basic;
 
-import java.util.List;
-
 public class BasicAlgorithms {
 
     public boolean isEven(final int number) {
@@ -30,26 +28,5 @@ public class BasicAlgorithms {
                 return n * factorial(n-1);
             }
         }
-    }
-
-    public int countOccurrencesOfANumber(final int [] numbers, final int number) {
-        int count = 0;
-        for(int i : numbers) {
-            if (i == number) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public int linearSearch(final List<Integer> listOfNumbers, final int number) {
-
-        for(int index = 0; index < listOfNumbers.size(); index++) {
-            if (listOfNumbers.get(index) == number) {
-                return index;
-            }
-        }
-
-        return -1;
     }
 }
