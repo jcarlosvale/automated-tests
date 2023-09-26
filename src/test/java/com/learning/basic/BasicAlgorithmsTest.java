@@ -2,99 +2,63 @@ package com.learning.basic;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BasicAlgorithmsTest {
 
     private final BasicAlgorithms basicAlgorithms = new BasicAlgorithms();
 
-    @Test
-    void isEvenReturnsTrueTest() {
+    @ParameterizedTest(name = "given {0} when isEven executes should return {1}")
+    @MethodSource("isEvenArguments")
+    void isEvenTest(final int number, final boolean expected) {
         // given
-        final int evenNumber = 222;
-        final boolean expected = true;
-
         // when
-        final boolean actual = basicAlgorithms.isEven(evenNumber);
+        final boolean actual = basicAlgorithms.isEven(number);
 
         // then
         assertEquals(expected, actual);
     }
 
-    @DisplayName("given an odd number, when isEven is called, then returns false")
-    @Test
-    void isEvenReturnsFalseTest() {
-        // given
-        final int evenNumber = 111;
-        final boolean expected = false;
+    public static Stream<Arguments> isEvenArguments() {
+        return Stream.of(
+                Arguments.of(21, false),
+                Arguments.of(22, true),
+                Arguments.of(0, true)
+        );
+    }
 
+    @ParameterizedTest(name = "given {0} when isPrime executes should return {1}")
+    @MethodSource("isPrimeArguments")
+    void isPrimeTest(final int number, final boolean expected) {
+        // given
         // when
-        final boolean actual = basicAlgorithms.isEven(evenNumber);
+        final boolean actual = basicAlgorithms.isPrime(number);
 
         // then
         assertEquals(expected, actual);
     }
 
-    @DisplayName("given a prime number, when isPrime is called, then returns true")
-    @Test
-    void isPrimeReturnsTrueTest() {
-        // given
-        final int number = 11;
-
-        // when
-        final boolean actual = basicAlgorithms.isPrime(number);
-
-        // then
-        assertTrue(actual);
-    }
-
-    @DisplayName("given a number that is not prime, when isPrime is called, then returns false")
-    @Test
-    void isPrimeReturnsFalseTest() {
-        // given
-        final int number = 432;
-
-        // when
-        final boolean actual = basicAlgorithms.isPrime(number);
-
-        // then
-        assertFalse(actual);
-    }
-
-    @DisplayName("given a number equals to 0, when isPrime is called, then returns false")
-    @Test
-    void isPrimeReturnsFalseToZeroValueTest() {
-        // given
-        final int number = 0;
-
-        // when
-        final boolean actual = basicAlgorithms.isPrime(number);
-
-        // then
-        assertFalse(actual);
-    }
-
-    @DisplayName("given a negative number, when isPrime is called, then returns false")
-    @Test
-    void isPrimeReturnsFalseToNegativeValueTest() {
-        // given
-        final int number = -11;
-
-        // when
-        final boolean actual = basicAlgorithms.isPrime(number);
-
-        // then
-        assertFalse(actual);
+    public static Stream<Arguments> isPrimeArguments() {
+        return Stream.of(
+                Arguments.of(991, true),
+                Arguments.of(0, false),
+                Arguments.of(45678, false),
+                Arguments.of(-991, false)
+        );
     }
 
     @DisplayName("given a positive number, when factorial is called, then returns its value")
     @Test
     void factorialTest() {
         // given
+        final BasicAlgorithms basicAlgorithms = new BasicAlgorithms();
         final int number = 5;
         final int expected = 120;
 
@@ -114,6 +78,8 @@ class BasicAlgorithmsTest {
         // when
         // then
         assertThrows(IllegalArgumentException.class,
-                () -> {basicAlgorithms.factorial(number);});
+                () -> {
+                    basicAlgorithms.factorial(number);
+                });
     }
 }
