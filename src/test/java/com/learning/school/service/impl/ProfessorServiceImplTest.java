@@ -1,5 +1,6 @@
 package com.learning.school.service.impl;
 
+import com.learning.school.dto.ProfessorRequestDTO;
 import com.learning.school.dto.ProfessorResponseDTO;
 import com.learning.school.mapper.ProfessorMapper;
 import com.learning.school.model.Professor;
@@ -7,27 +8,39 @@ import com.learning.school.repository.ProfessorRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMostOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 class ProfessorServiceImplTest {
 
-    private ProfessorMapper mapper = Mockito.mock(ProfessorMapper.class);
-    private ProfessorRepository repository = Mockito.mock(ProfessorRepository.class);
+    private ProfessorMapper mapper = mock(ProfessorMapper.class);
+    private ProfessorRepository repository = mock(ProfessorRepository.class);
     private ProfessorServiceImpl service = new ProfessorServiceImpl(mapper, repository);
 
     @DisplayName(
             "when findALL is called, " +
-            "then returns a list of response")
+                    "then returns a list of response")
     @Test
     void findAllTest() {
         // given
         var professorList = List.of(
-                Mockito.mock(Professor.class),
-                Mockito.mock(Professor.class)
+                mock(Professor.class),
+                mock(Professor.class)
         );
         var expectedResponse = List.of(
                 new ProfessorResponseDTO(
@@ -42,28 +55,28 @@ class ProfessorServiceImplTest {
                 )
         );
 
-        Mockito.when(repository.findAll())
+        when(repository.findAll())
                 .thenReturn(professorList);
-        Mockito.when(mapper.toDTO(professorList))
+        when(mapper.toDTO(professorList))
                 .thenReturn(expectedResponse);
 
         // when
         var actualResponse = service.findAll();
 
         // then
-        Assertions.assertEquals(expectedResponse, actualResponse);
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @DisplayName(
             "given a valid UUID " +
-            "when findById is called, " +
-            "then returns a response")
+                    "when findById is called, " +
+                    "then returns a response")
     @Test
     void findByIdTest() {
         // given
         var id = UUID.randomUUID();
 
-        var professor = Mockito.mock(Professor.class);
+        var professor = mock(Professor.class);
         var professorOptional = Optional.of(professor);
 
         var response =
@@ -74,26 +87,26 @@ class ProfessorServiceImplTest {
         var expectedResponse = Optional.of(response);
 
 
-        Mockito.when(repository.findById(id))
+        when(repository.findById(id))
                 .thenReturn(professorOptional);
-        Mockito.when(mapper.toDTO(professor))
+        when(mapper.toDTO(professor))
                 .thenReturn(response);
 
         // when
         var actualResponse = service.findById(id.toString());
 
         // then
-        Assertions.assertEquals(expectedResponse, actualResponse);
-        Mockito.verify(repository, Mockito.times(1))
+        assertEquals(expectedResponse, actualResponse);
+        verify(repository, times(1))
                 .findById(id);
-        Mockito.verify(repository, Mockito.atMostOnce())
+        verify(repository, atMostOnce())
                 .findById(id);
     }
 
     @DisplayName(
             "given an invalid UUID " +
-            "when findById is called, " +
-            "then throws an exception")
+                    "when findById is called, " +
+                    "then throws an exception")
     @Test
     void findByIdFailsTest() {
         // given
@@ -107,9 +120,39 @@ class ProfessorServiceImplTest {
         );
 
         // then
-        Mockito.verify(repository, Mockito.times(0))
-                .findById(Mockito.any());
-        Mockito.verify(repository, Mockito.never())
-                .findById(Mockito.any());
+        verify(repository, times(0))
+                .findById(any());
+        verify(repository, never())
+                .findById(any());
+    }
+
+    @DisplayName(
+            "given a request " +
+                    "when save is called, " +
+                    "then the Professor is inserted")
+    @Test
+    void saveTest() {
+        // given
+        var request = mock(ProfessorRequestDTO.class);
+        var idCaptor = ArgumentCaptor.forClass(UUID.class);
+        var professor = mock(Professor.class);
+        var expected = mock(ProfessorResponseDTO.class);
+
+        when(mapper.toModel(any(UUID.class), eq(request)))
+                .thenReturn(professor);
+        when(repository.save(professor))
+                .thenReturn(professor);
+        when(mapper.toDTO(professor))
+                .thenReturn(expected);
+
+        // when
+        var actual = service.save(request);
+
+        // then
+        verify(mapper).toModel(idCaptor.capture(), eq(request));
+        assertNotNull(idCaptor.getValue());
+        assertEquals(expected, actual);
+        verify(repository, times(1))
+                .save(professor);
     }
 }
