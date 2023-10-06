@@ -2,6 +2,7 @@ package com.learning.school.service.impl;
 
 import com.learning.school.dto.ProfessorRequestDTO;
 import com.learning.school.dto.ProfessorResponseDTO;
+import com.learning.school.exception.ProfessorNotFoundException;
 import com.learning.school.mapper.ProfessorMapper;
 import com.learning.school.model.Professor;
 import com.learning.school.repository.ProfessorRepository;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
@@ -154,5 +154,27 @@ class ProfessorServiceImplTest {
         assertEquals(expected, actual);
         verify(repository, times(1))
                 .save(professor);
+    }
+
+    @DisplayName(
+            "given an id does not exist and a request " +
+                    "when update is called, " +
+                    "then an exception is threw")
+    @Test
+    void updateProfessorNotFoundTest() throws ProfessorNotFoundException {
+        // given
+        var id = UUID.randomUUID();
+        var request = mock(ProfessorRequestDTO.class);
+        var professor = mock(Professor.class);
+
+        when(mapper.toModel(any(UUID.class), eq(request)))
+                .thenReturn(professor);
+        when(repository.update(professor))
+                .thenThrow(new ProfessorNotFoundException());
+
+        // when
+        // then
+        Assertions.assertThrows(ProfessorNotFoundException.class,
+                () ->  service.update(id.toString(), request));
     }
 }
